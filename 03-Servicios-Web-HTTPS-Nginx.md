@@ -1,68 +1,73 @@
-# Fase 2: Servicios Web Avanzados y Cifrado HTTPS/TLS (Nginx)
+# Hito 03: Servidor Web Nginx con TLS/SSL y Cabeceras de Seguridad
 
 ## 🎯 Objetivo
-Hacer evolucionar el servidor web Nginx desde una configuración por defecto hacia una arquitectura web segura y aislada en producción. Se implementó un Server Block propio, cifrado SSL/TLS con certificados de 2048 bits mediante OpenSSL, redirección automática obligatoria de HTTP (80) a HTTPS (443), ocultamiento de firma del demonio (`server_tokens off`) y aplicación de cabeceras de seguridad (*Security Headers*).
+Desplegar un servidor web Nginx seguro en Ubuntu Server (`192.168.233.140`), configurando cifrado de transporte mediante certificados TLS/SSL, redirección automática HTTP a HTTPS y cabeceras de seguridad HTTP (*HTTP Security Headers*) alineadas con estándares modernos.
 
 ---
 
-## 🛠️ 1. Estructura del Sitio y Server Block Aislado
-Se creó el directorio dedicado para el sitio web y se desvinculó de la página por defecto de Nginx:
-
-* **Directorio raíz del sitio:** `/va/homelab/html`
-* **Permisos:** Propietario asignado al usuario sin privilegios para evitar ejecución como root.
-* **Archivo de configuración del sitio:** `/etc/nginx/sites-available/homelab`
-* **Activación del Virtual Host:**
-  ```bash
-  sudo ln -s /etc/nginx/sites-available/homelab /etc/nginx/sites-enabled/
-  ```
-
----
-
-## 🔒 2. Generación del Certificado TLS/SSL con OpenSSL
-Para habilitar la capa de transporte seguro (HTTPS) en el entorno de laboratorio local, se generó un certificado autofirmado de 2048 bits y su clave privada correspondiente:
+## 📁 1. Estructura del Sitio Web
+Se creó el directorio raíz del sitio en la ruta estándar del sistema `/var/www/homelab/html` con permisos restringidos:
 
 ```bash
+sudo mkdir -p /var/www/homelab/html
+sudo chown -R $USER:$USER /var/www/homelab/html
+sudo chmod -R 755 /var/www/homelab
+```
+
+Se desplegó un archivo `index.html` personalizado con la identidad del laboratorio.
+
+---
+
+## 🔐 2. Generación de Certificado TLS/SSL con SAN (Subject Alternative Name)
+Se generó un par de claves y certificado X.509 autofirmado utilizando OpenSSL, incluyendo la extensión SAN para evitar advertencias de validación estricta de nombres en navegadores modernos:
+
+```bash
+sudo mkdir -p /etc/ssl/homelab
+
 sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-  -keyout /etc/ssl/private/nginx-selfsigned.key \
-  -out /etc/ssl/certs/nginx-selfsigned.crt \
-  -subj "/C=ES/ST=State/L=City/O=Homelab/OU=IT/CN=192.168.233.140"
+  -keyout /etc/ssl/homelab/nginx-selfsigned.key \
+  -out /etc/ssl/homelab/nginx-selfsigned.crt \
+  -subj "/CN=192.168.233.140/O=Homelab Cybersecurity/C=ES" \
+  -addext "subjectAltName=IP:192.168.233.140"
 ```
 
 ---
 
-## ⚙️ 3. Configuración del Servidor Web Endurecido (`/etc/nginx/sites-available/homelab`)
+## ⚙️ 3. Configuración del Virtual Host en Nginx (`/etc/nginx/sites-available/homelab`)
+
+Se configuró el bloque de servidor implementando redirección 301 forzada a HTTPS y cabeceras de protección defensivas con la cláusula `always;` para asegurar su envío en todos los códigos de respuesta HTTP:
 
 ```nginx
-# Redirección obligatoria de HTTP a HTTPS
+# Bloque HTTP - Redirección 301 a HTTPS
 server {
     listen 80;
+    listen [::]:80;
     server_name 192.168.233.140;
+
     return 301 https://$host$request_uri;
 }
 
-# Servidor Web Seguro (HTTPS)
+# Bloque HTTPS - Servidor Seguro
 server {
-    listen 443 ssl;
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
     server_name 192.168.233.140;
 
     root /var/www/homelab/html;
     index index.html;
 
-    # Certificados SSL/TLS
-    ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
-    ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
-
-    # Protocolos seguros (TLS 1.2 y 1.3 únicamente)
+    # Certificados TLS/SSL
+    ssl_certificate /etc/ssl/homelab/nginx-selfsigned.crt;
+    ssl_certificate_key /etc/ssl/homelab/nginx-selfsigned.key;
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
 
-    # Ocultar versión del demonio Nginx (Footprinting prevention)
-    server_tokens off;
-
-    # Cabeceras de Seguridad (Security Headers)
-    add_header X-Frame-Options "SAMEORIGIN";
-    add_header X-Content-Type-Options "nosniff";
-    add_header X-XSS-Protection "1; mode=block";
+    # Cabeceras de Seguridad HTTP (Security Headers)
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Content-Security-Policy "default-src 'self';" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
 
     location / {
         try_files $uri $uri/ =404;
@@ -70,34 +75,27 @@ server {
 }
 ```
 
+**Validación y activación del sitio:**
+```bash
+sudo ln -s /etc/nginx/sites-available/homelab /etc/nginx/sites-enabled/
+sudo rm /etc/nginx/sites-enabled/default
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
 ---
 
-## 🛡️ 4. Reglas del Firewall (UFW)
-Se actualizó la política del firewall para permitir el tráfico web cifrado:
+## 🧪 4. Verificación de Seguridad y Respuesta HTTP
+
+Se verificó la respuesta del servidor web mediante `curl` evaluando las cabeceras emitidas:
 
 ```bash
-sudo ufw allow 'Nginx Full'
+curl -I -k https://192.168.233.140
 ```
-* **Estado final de UFW:** Permite `22/tcp` (SSH endurecido), `80/tcp` (HTTP para redirección) y `443/tcp` (HTTPS cifrado).
 
----
+### Output Obtenido:
 
-## 🧪 5. Verificación y Auditoría de Respuestas HTTP/HTTPS
+![[imagen13.png]]
 
-### A. Verificación de Redirección Automática (HTTP 80 -> HTTPS 443)
-```powershell
-curl.exe -I http://192.168.233.140
-```
-![Demostración](assets/imagen1.png)
-* **Resultado:** `HTTP/1.1 301 Moved Permanently` apuntando a `https://192.168.233.140`.
-
-### B. Verificación de Conexión Segura HTTPS y Cabeceras
-```powershell
-curl.exe -kI https://192.168.233.140
-```
-![Demostración](assets/imagen2.png)
-* **Resultado:** `HTTP/1.1 200 OK`.
-* **Cabeceras confirmadas:** `X-Frame-Options: SAMEORIGIN`, `X-Content-Type-Options: nosniff`, `X-XSS-Protection: 1; mode=block`.
-* **Seguridad adicional:** La cabecera `Server` omite el número de versión exacta del demonio Nginx.
-
----
+* **Redirección 301:** Comprobada solicitando `http://192.168.233.140` (devuelve `Location: https://192.168.233.140/`).
+* **Verificación de Cabeceras:** `X-Frame-Options: DENY` previene ataques de Clickjacking; `X-Content-Type-Options: nosniff` mitiga MIME-sniffing; `Strict-Transport-Security` fuerza conexiones HTTPS futuras.

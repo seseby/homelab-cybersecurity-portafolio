@@ -1,0 +1,35 @@
+# Redirección obligatoria de HTTP a HTTPS
+server {
+        listen 80;
+        server_name 192.168.233.140;
+        return 301 https://$host$request_uri;
+}
+
+# Servidor Web Seguro (HTTPS)
+server {
+        listen 443 ssl;
+        server_name 192.168.233.140;
+
+        root /var/www/homelab/html;
+        index index.html;
+
+        # Certificados SSL/TLS
+        ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
+        ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
+
+        # Protocolos seguros (TLS 1.2 y 1.3 únicamente)
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_ciphers HIGH:!aNULL:!MD5;
+
+        # Ocultar versión de Nginx
+        server_tokens off;
+
+        # Cabeceras de Seguridad (Security Headers)
+        add_header X-Frame-Options "SAMEORIGIN";
+        add_header X-Content-Type-Options "nosniff";
+        add_header X-XSS-Protection "1; mode=block";
+
+        location / {
+                try_files $uri $uri/ =404;
+        }
+}

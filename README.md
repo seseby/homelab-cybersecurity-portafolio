@@ -1,73 +1,85 @@
-# 🛡️ Homelab Cybersecurity & Systems Hardening Portfolio
+# 🛡️ IT Cybersecurity Homelab Portfolio
 
-![Status](https://img.shields.io/badge/Status-In%20Progress-orange)
-![OS](https://img.shields.io/badge/OS-Ubuntu%20Server%2022.04%20LTS-E95420)
-![Security](https://img.shields.io/badge/Security-Hardening%20%26%20Defense-blue)
+![Status](https://img.shields.io/badge/Status-In%20Progress-yellow)
+![Platform](https://img.shields.io/badge/OS-Ubuntu%20Server%2024.04%20LTS-orange)
+![Security](https://img.shields.io/badge/Focus-Defensive%20Security%20%26%20Sysadmin-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-Repositorio de documentación técnica y evidencias del despliegue, endurecimiento (*hardening*) y administración segura de un entorno **Homelab de Ciberseguridad Defensiva**.
+## 📌 Resumen Ejecutivo
+
+Este repositorio documenta el despliegue, aseguramiento (*hardening*) y administración de un entorno de laboratorio Linux (**Ubuntu Server 24.04 LTS**). El objetivo del proyecto es aplicar controles de ciberseguridad defensiva a nivel de host, filtrado de tráfico de red, aseguramiento de servicios web HTTPS, mitigación reactiva de ataques de fuerza bruta y políticas de respaldo local con pruebas de restauración.
 
 ---
 
-## 📌 Visión General y Arquitectura
+## 📐 Arquitectura y Topología de Red
 
-Este laboratorio documenta la implementación de medidas de seguridad a nivel de host, filtrado perimetral, cifrado de transporte, prevención de intrusiones mediante análisis de logs y automatización de respaldos en un servidor Linux Ubuntu Server.
+El laboratorio se estructura en una red interna privada (`192.168.233.0/24`) aislada mediante hipervisor:
 
-### Topología de Red
+| Host / Nodo | Rol | Dirección IP | Función Principal |
+| :--- | :--- | :--- | :--- |
+| **`ubuntuserver`** | Servidor Principal | `192.168.233.140` | Servidor web Nginx, bastión SSH, UFW, Fail2ban |
+| **`ubuntuclient`** | Cliente de Gestión | `192.168.233.136` | Equipo autorizado para administración SSH y pruebas |
+| **`winadmin`** | Estación Admin | `192.168.233.1` | Auditoría externa, PowerShell, pruebas HTTP/HTTPS |
+
+---
+
+## 🗂️ Estructura del Repositorio y Módulos
+
+El proyecto está organizado en 5 hitos técnicos secuenciales:
 
 ```text
-[ Cliente / Atacante ] ── (192.168.233.136)
-          │
-          ▼
-[ Firewall UFW / Fail2ban H-IPS ]
-          │
-          ├─► SSH (22/tcp) ──────► Auth por Clave Ed25519 (Password Auth: OFF)
-          ├─► HTTP (80/tcp) ─────► Redirección 301 a HTTPS
-          └─► HTTPS (443/tcp) ───► Nginx + TLS 1.2/1.3 + Security Headers
+.
+├── README.md                              # Documentación general del portafolio
+├── LICENSE                                # Licencia de código abierto MIT
+├── 01-Hardening-Linux-SSH.md              # Hito 01: Configuración estricta de SSH
+├── 02-Firewall-UFW.md                     # Hito 02: Filtrado granular con UFW
+├── 03-Servicios-Web-HTTPS-Nginx.md        # Hito 03: Despliegue de Nginx y TLS/SSL
+├── 04-Mitigacion-Fuerza-Bruta-Fail2ban.md # Hito 04: H-IPS reactivo con Fail2ban
+├── 05-Automatizacion-Respaldos-Bash-Cron.md # Hito 05: Script de backup y restauración
+├── configs/                               # Archivos de configuración limpios
+├── scripts/                               # Scripts de automatización en Bash
+└── assets/                                # Capturas de pantalla y evidencias
 ```
 
 ---
 
-## 📚 Módulos del Proyecto
+## 🚀 Resumen Técnico de los Hitos
 
-| Módulo | Documento | Descripción Técnica |
-| :--- | :--- | :--- |
-| **01** | [`01-Hardening-Linux-SSH.md`](./01-Hardening-Linux-SSH.md) | Desactivación de autenticación por contraseña, claves Ed25519 y verificación runtime con `sshd -T`. |
-| **02** | [`02-Firewall-UFW.md`](./02-Firewall-UFW.md) | Política por defecto *Deny All*, apertura estricta de servicios e inspección de reglas. |
-| **03** | [`03-Servicios-Web-HTTPS-Nginx.md`](./03-Servicios-Web-HTTPS-Nginx.md) | Server Block en Nginx, certificados SSL/TLS (2048-bit), redirección HTTP 301 y cabeceras de seguridad. |
-| **04** | [`04-Mitigacion-Fuerza-Bruta-Fail2ban.md`](./04-Mitigacion-Fuerza-Bruta-Fail2ban.md) | Prevención de intrusiones basada en host (H-IPS), análisis de `/var/log/auth.log` y baneo dinámico UFW. |
-| **05** | [`05-Automatizacion-Respaldos-Bash-Cron.md`](./05-Automatizacion-Respaldos-Bash-Cron.md) | Script en Bash para backup de configuraciones críticas y sitio web, retención de 7 días y programación vía `cron`. |
+### 🔑 [Hito 01: Hardening Estricto del Servicio SSH](01-Hardening-Linux-SSH.md)
+* **Despliegue de Llaves:** Generación de pares de llaves **Ed25519** y desactivación total de `PasswordAuthentication`.
+* **Mínimo Privilegio:** Restricción de acceso mediante `AllowUsers`, `PermitRootLogin no` y `MaxAuthTries 3`.
+* **Auditoría Runtime:** Verificación efectiva de parámetros mediante `sudo sshd -T` para descartar sobreescrituras en `/etc/ssh/sshd_config.d/`.
 
+### 🧱 [Hito 02: Configuración del Firewall Perimetral (UFW)](02-Firewall-UFW.md)
+* **Política por Defecto:** Denegación implícita de tráfico entrante (`default deny incoming`).
+* **Reglas Granulares:** Restricción del puerto `22/tcp` exclusivamente a la IP autorizada (`192.168.233.136`).
+* **Servicios Web:** Apertura explícita de puertos `80/tcp` (HTTP) y `443/tcp` (HTTPS).
+
+### 🔒 [Hito 03: Aseguramiento de Servicios Web con Nginx y TLS](03-Servicios-Web-HTTPS-Nginx.md)
+* **Cifrado TLS/SSL:** Generación de certificado OpenSSL con extensión **Subject Alternative Name (SAN)**.
+* **Redirección HTTPS:** Configuración de respuesta HTTP 301 para forzar conexiones cifradas.
+* **Cabeceras HTTP de Seguridad:** Inyección con directiva `always;` de **HSTS**, **CSP** (`default-src 'self'`), `X-Frame-Options DENY` y `X-Content-Type-Options nosniff`.
+
+### 🚨 [Hito 04: Prevención de Intrusiones Basada en Host (Fail2ban)](04-Mitigacion-Fuerza-Bruta-Fail2ban.md)
+* **Protección Reactiva:** Análisis en tiempo real de `/var/log/auth.log` ante fallos de autenticación.
+* **Prevención de Autobaneo:** Configuración de `ignoreip` para evitar el bloqueo del nodo de administración.
+* **Simulación y Unban:** Registro de eventos de bloqueo e inyección dinámica de reglas `REJECT` en UFW.
+
+### 💾 [Hito 05: Automatizacion de Respaldos y Prueba de Restauracion](05-Automatizacion-Respaldos-Bash-Cron.md)
+* **Script Bash:** Compresión en tarball (`.tar.gz`) de sitio web, configs SSH, Nginx, UFW y certificados SSL.
+* **Programación Cron:** Tarea automatizada diaria a las 02:00 AM con rotación a 7 días.
+* **Prueba de Recuperación:** Verificación de integridad mediante simulacro de restauración (*Restore Drill*).
 ---
 
-## 🔍 Desafíos Técnicos y Lecciones Aprendidas (Troubleshooting)
+## 💻 Instalación y Uso
 
-1. **Verificación de Configuración SSH Efectiva (`sshd -T`):**
-   * *Desafío:* La directiva `PasswordAuthentication no` en `/etc/ssh/sshd_config` puede ser sobrescrita por archivos en `/etc/ssh/sshd_config.d/*.conf`.
-   * *Solución:* Verificación runtime obligatoria con `sudo sshd -T | grep -i passwordauthentication` y pruebas de acceso denegado con `ssh -o PubkeyAuthentication=no`.
-
-2. **Diferencias entre `curl` en PowerShell e Invoke-WebRequest:**
-   * *Desafío:* En Windows PowerShell, `curl` es un alias de `Invoke-WebRequest`, rechazando parámetros nativos como `-kI`.
-   * *Solución:* Ejecución explícita de `curl.exe` para validar cabeceras HTTP/HTTPS y respuestas 301.
-
-3. **Inyección Dinámica de Reglas con Fail2ban:**
-   * *Desafío:* Validar que Fail2ban no solo detecte el ataque, sino que active la acción defensiva a nivel de firewall.
-   * *Solución:* Prueba de concepto con intentos fallidos simulados, verificación de regla `REJECT` en `ufw status` y procedimiento de desbloqueo manual mediante `fail2ban-client set sshd unbanip`.
-
----
-
-## 🖼️ Evidencias y Capturas de Pantalla
-
-Las capturas de pantalla, salidas de consola y logs reales del sistema se almacenan en el directorio [`/assets`](./assets)
-
----
-
-## 🚀 Clonado e Instalación
-
-Para replicar o revisar la documentación localmente:
+Para replicar o revisar este repositorio en tu entorno local:
 
 ```bash
+# Clonar el repositorio
 git clone https://github.com/seseby/homelab-cybersecurity-portafolio.git
+
+# Acceder al directorio
 cd homelab-cybersecurity-portafolio
 ```
 
@@ -75,4 +87,4 @@ cd homelab-cybersecurity-portafolio
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT. Consulta el archivo [`LICENSE`](./LICENSE) para más detalles.
+Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.

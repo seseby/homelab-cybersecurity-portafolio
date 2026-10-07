@@ -1,0 +1,18 @@
+[DEFAULT]
+# Excluir la IP de administración para evitar el autobaneo accidental
+ignoreip = 127.0.0.1/8 ::1 192.168.233.136
+
+# Tiempo de bloqueo (10 minutos)
+bantime  = 10m
+# Ventana de tiempo para contabilizar reintentos
+findtime = 10m
+# Número máximo de fallos permitidos
+maxretry = 3
+# Integración directa con UFW
+banaction = ufw
+
+[sshd]
+enabled = true
+port    = ssh
+logpath = %(sshd_log)s
+backend = %(sshd_backend)s
