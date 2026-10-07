@@ -147,4 +147,4 @@ Este proyecto me ha permitido comprender y poner a prueba los siguientes princip
 
 ## 📜 Licencia
 
-Este proyecto está bajo la Licencia **MIT** - consulta el archivo [LICENSE](LICENSE) para más detalles.
+Este proyecto está bajo la Licencia **MIT** - consulta el archivo [LICENSE](LICENSE.md) para más detalles.
