@@ -58,7 +58,7 @@ Este proyecto documenta la implementación, verificación y auditoría de contro
 2. **[Hito 02: Firewall y Control de Acceso con UFW](02-Firewall-UFW.md)** — Reglas restrictivas por IP de origen, eliminación de redundancias y política global de denegación entrante.
 3. **[Hito 03: Servicios Web Seguros con Nginx y TLS](03-Servicios-Web-HTTPS-Nginx.md)** — Implementación de certificados TLS, cifrados seguros, redirección HTTP a HTTPS y cabeceras de protección.
 4. **[Hito 04: Prevención de Fuerza Bruta con Fail2ban](04-Mitigacion-Fuerza-Bruta-Fail2ban.md)** — Protección contra ataques de diccionario basada en análisis de logs, jaulas personalizadas y exclusión de la IP administrativa.
-5. **[Hito 05: Respaldos Automatizados y Prueba de Restauración](05-Automatizacion-Respaldos-Bash-Crone.md)** — Script en Bash para empaquetado de datos/configuraciones, programación en `cron` y prueba de extracción de recuperación.
+5. **[Hito 05: Respaldos Automatizados y Prueba de Restauración](05-Automatizacion-Respaldos-Bash-Cron.md)** — Script en Bash para empaquetado de datos/configuraciones, programación en `cron` y prueba de extracción de recuperación.
 
 ---
 
