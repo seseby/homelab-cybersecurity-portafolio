@@ -43,7 +43,7 @@ Este proyecto documenta la implementación, verificación y auditoría de contro
        │           IP: 192.168.233.140           │
        ├─────────────────────────────────────────┤
        │  • OpenSSH (Hardened - Solo Ed25519)    │
-       │  • UFW Firewall (Filtro por IP/Puerto)   │
+       │  • UFW Firewall (Filtro por IP/Puerto)  │
        │  • Nginx Web Server (HTTPS & Headers)   │
        │  • Fail2ban (Análisis de auth.log)      │
        │  • Backup & Restore Drill (Bash + Cron) │
