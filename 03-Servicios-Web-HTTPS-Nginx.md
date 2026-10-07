@@ -88,7 +88,7 @@ sudo ufw allow 'Nginx Full'
 ```powershell
 curl.exe -I http://192.168.233.140
 ```
-![[Pasted image 20261007145252.png]]
+![[imagen1.png]]
 * **Resultado:** `HTTP/1.1 301 Moved Permanently` apuntando a `https://192.168.233.140`.
 
 ### B. Verificación de Conexión Segura HTTPS y Cabeceras
