@@ -112,7 +112,7 @@ sudo /usr/local/bin/backup-homelab.sh
 ls -lh /var/backups/homelab/
 ```
 
-![[imagen19.png]]
+![Descripción de la imagen](assets/imagen19.png)
 
 ### B. Registro de Auditoría (`/var/log/homelab_backup.log`)
 ```text

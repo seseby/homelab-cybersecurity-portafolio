@@ -53,13 +53,13 @@ Dado que la autenticación por contraseña está deshabilitada (`PasswordAuthent
 ```bash
 ssh -o PubkeyAuthentication=no usuariofalso@192.168.233.140
 ```
-![[Pasted image 20261007191355.png]]
+![Descripción de la imagen](assets/imagen14.png)
 *(Se ejecutaron 4 intentos fallidos consecutivos).*
 
 ### B. Inspección del Log de Autenticación (`/var/log/auth.log`)
 El servidor registró las anomalías en el log del sistema:
 
-![[imagen15.png]]
+![Descripción de la imagen](assets/imagen15.png)
 
 ---
 
@@ -70,7 +70,7 @@ El servidor registró las anomalías en el log del sistema:
 sudo fail2ban-client status sshd
 ```
 
-![[imagen16.png]]
+![Descripción de la imagen](assets/imagen16.png)
 
 ### B. Inyección Automática de Regla en UFW
 Fail2ban inyectó una regla de rechazo dinámico al inicio de la cadena de UFW:
@@ -79,7 +79,7 @@ Fail2ban inyectó una regla de rechazo dinámico al inicio de la cadena de UFW:
 sudo ufw status
 ```
 
-![[imagen17.png]]
+![Descripción de la imagen](assets/imagen17.png)
 
 ### C. Procedimiento de Unban (Desbloqueo de Gestión)
 Se verificó el procedimiento operativo para levantar el bloqueo administrativo sobre la IP:
@@ -87,6 +87,6 @@ Se verificó el procedimiento operativo para levantar el bloqueo administrativo 
 ```bash
 sudo fail2ban-client set sshd unbanip 192.168.233.136
 ```
-![[imagen18.png]]
+![Descripción de la imagen](assets/imagen18.png)
 ---
 

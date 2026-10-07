@@ -95,7 +95,7 @@ curl -I -k https://192.168.233.140
 
 ### Output Obtenido:
 
-![[imagen13.png]]
+![Descripción de la imagen](assets/imagen13.png)
 
 * **Redirección 301:** Comprobada solicitando `http://192.168.233.140` (devuelve `Location: https://192.168.233.140/`).
 * **Verificación de Cabeceras:** `X-Frame-Options: DENY` previene ataques de Clickjacking; `X-Content-Type-Options: nosniff` mitiga MIME-sniffing; `Strict-Transport-Security` fuerza conexiones HTTPS futuras.

@@ -54,7 +54,7 @@ Debido a que Ubuntu Server puede procesar archivos de configuración secundarios
 ```bash
 sudo sshd -T | grep -i passwordauthentication
 ```
-* **Salida obtenida:** ![[imagen11.png]]
+* **Salida obtenida:**![Descripción de la imagen](assets/imagen11.png)
 
 ### B. Prueba de Estrés / Intento de Login por Contraseña
 Se ejecutó un intento deliberado de autenticación omitiendo las llaves públicas desde un cliente no autorizado:
@@ -65,5 +65,5 @@ ssh -o PubkeyAuthentication=no sebastian@192.168.233.140
 
 * **Resultado obtenido:** `Permission denied (publickey)`.
 * **Conclusión:** El servidor rechaza cualquier solicitud que no presente una firma criptográfica válida en `authorized_keys`.
-![[imagen12.png]]
+![Descripción de la imagen](assets/imagen12.png)
 ---
