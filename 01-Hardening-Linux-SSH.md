@@ -41,8 +41,26 @@ sudo systemctl reload ssh
 
 ---
 
-## 🧪 3. Auditoría y Verificación de Seguridad
-Para validar que el hardening impide efectivamente la autenticación basada en contraseñas tradicionales, se ejecutó la siguiente prueba de estrés desde un equipo cliente:
+## 🔎 3. Verificación de la Configuración Efectiva en Tiempo de Ejecución (Runtime)
+En entornos modernos como Ubuntu Server, la directiva `Include /etc/ssh/sshd_config.d/*.conf` en `/etc/ssh/sshd_config` puede hacer que archivos secundarios (como los creados por `cloud-init` u otros instaladores) sobrescriban los parámetros principales.
+
+Para validar la **configuración efectiva real** procesada por el demonio OpenSSH en tiempo de ejecución, se ejecutó la siguiente evaluación de estado:
+
+```bash
+sudo sshd -T | grep -i passwordauthentication
+```
+
+* **Salida obtenida:**
+  ```text
+  passwordauthentication no
+  ```
+
+> **Lección de Auditoría:** Validar `/etc/ssh/sshd_config` estáticamente no garantiza el comportamiento final del servicio. Evaluar el estado en tiempo de ejecución con `sshd -T` es el estándar técnico para confirmar que no existen archivos en `sshd_config.d/` alterando las directivas de hardening.
+
+---
+
+## 🧪 4. Prueba de Estrés y Simulación de Ataque
+Para validar que el servicio rechaza activamente las conexiones no autenticadas por clave criptográfica, se forzó un intento de autenticación por contraseña omitiendo el uso de llaves públicas desde el cliente:
 
 ```powershell
 # Intento deliberado de forzar autenticación por contraseña omitiendo las llaves
@@ -51,5 +69,5 @@ ssh -o PubkeyAuthentication=no sebastian@192.168.233.140
 
 * **Resultado obtenido:** `Permission denied (publickey)`.
 * **Conclusión:** El servidor rechaza cualquier solicitud que no presente una firma criptográfica válida en `authorized_keys`.
-
+![Demostración](assets/imagen7.png)
 ---
