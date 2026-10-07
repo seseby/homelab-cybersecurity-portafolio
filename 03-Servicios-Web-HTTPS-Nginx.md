@@ -88,14 +88,14 @@ sudo ufw allow 'Nginx Full'
 ```powershell
 curl.exe -I http://192.168.233.140
 ```
-![[imagen1.png]]
+![Demostración](assets/imagen1.png)
 * **Resultado:** `HTTP/1.1 301 Moved Permanently` apuntando a `https://192.168.233.140`.
 
 ### B. Verificación de Conexión Segura HTTPS y Cabeceras
 ```powershell
 curl.exe -kI https://192.168.233.140
 ```
-![[Pasted image 20261007145321.png]]
+![Demostración](assets/imagen2.png)
 * **Resultado:** `HTTP/1.1 200 OK`.
 * **Cabeceras confirmadas:** `X-Frame-Options: SAMEORIGIN`, `X-Content-Type-Options: nosniff`, `X-XSS-Protection: 1; mode=block`.
 * **Seguridad adicional:** La cabecera `Server` omite el número de versión exacta del demonio Nginx.

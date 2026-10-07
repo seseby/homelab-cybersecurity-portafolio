@@ -36,13 +36,13 @@ backend = %(sshd_backend)s
 sudo systemctl enable --now fail2ban
 sudo fail2ban-client status
 ```
-![[Pasted image 20261007145521.png]]
+![Demostración](assets/imagen3.png)
 ---
 
 ## 🧪 2. Prueba de Concepto: Simulación de Ataque de Fuerza Bruta
 
 Se realizaron múltiples intentos de inicio de sesión SSH no autorizados desde el cliente cliente/atacante con IP `192.168.233.136`.
-![[Pasted image 20261007145541.png]]
+![Demostración](assets/imagen4.png)
 ### A. Detección y Baneo Automático
 Tras sobrepasar los 3 intentos fallidos permitidos, Fail2ban interceptó el evento en `/var/log/auth.log` e inyectó una regla de rechazo dinámico en UFW.
 

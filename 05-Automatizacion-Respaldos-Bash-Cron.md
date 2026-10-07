@@ -113,7 +113,7 @@ Se ejecutó el script manualmente para verificar el empaquetado, la integridad d
   ls -lh /var/backups/homelab/
   # Resultado: homelab_backup_2026-10-07_124015.tar.gz (12 KB)
   ```
-![[Pasted image 20261007145816.png]]
+![Demostración](assets/imagen5.png)
 * **Inspección del registro de bitácora (`/var/log/homelab_backup.log`):**
   ```text
   [mié 07 oct 2026 12:40:15 UTC] Starting Homelab Backup Process...
@@ -141,6 +141,6 @@ Para garantizar la ejecución desatendida del respaldo de forma diaria a las **0
   ```bash
   sudo crontab -l
   ```
-![[Pasted image 20261007145839.png]]
+![Demostración](assets/imagen6.png)
 ---
 
