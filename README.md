@@ -1,90 +1,150 @@
-# 🛡️ IT Cybersecurity Homelab Portfolio
+# Laboratorio de Ciberseguridad en Ubuntu Server
 
-![Status](https://img.shields.io/badge/Status-In%20Progress-yellow)
-![Platform](https://img.shields.io/badge/OS-Ubuntu%20Server%2024.04%20LTS-orange)
-![Security](https://img.shields.io/badge/Focus-Defensive%20Security%20%26%20Sysadmin-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
+Laboratorio práctico de ciberseguridad enfocado en hardening de Linux, seguridad de red, seguridad web, prevención de fuerza bruta y automatización de respaldos con pruebas de restauración.
 
-## 📌 Resumen Ejecutivo
-
-Este repositorio documenta el despliegue, aseguramiento (*hardening*) y administración de un entorno de laboratorio Linux (**Ubuntu Server 24.04 LTS**). El objetivo del proyecto es aplicar controles de ciberseguridad defensiva a nivel de host, filtrado de tráfico de red, aseguramiento de servicios web HTTPS, mitigación reactiva de ataques de fuerza bruta y políticas de respaldo local con pruebas de restauración.
-
----
-
-## 📐 Arquitectura y Topología de Red
-
-El laboratorio se estructura en una red interna privada (`192.168.233.0/24`) aislada mediante hipervisor:
-
-| Host / Nodo | Rol | Dirección IP | Función Principal |
-| :--- | :--- | :--- | :--- |
-| **`ubuntuserver`** | Servidor Principal | `192.168.233.140` | Servidor web Nginx, bastión SSH, UFW, Fail2ban |
-| **`ubuntuclient`** | Cliente de Gestión | `192.168.233.136` | Equipo autorizado para administración SSH y pruebas |
-| **`winadmin`** | Estación Admin | `192.168.233.1` | Auditoría externa, PowerShell, pruebas HTTP/HTTPS |
+| Parámetro | Detalle |
+| :--- | :--- |
+| **Estado** | ![Estado](https://img.shields.io/badge/Estado-En_Progreso-yellow) |
+| **Plataforma** | VMware Workstation / VirtualBox |
+| **Sistema Operativo** | Ubuntu Server 24.04 LTS |
+| **Tecnologías** | Linux \| SSH \| UFW \| Nginx \| TLS \| Fail2ban \| Bash \| Cron |
 
 ---
 
-## 🗂️ Estructura del Repositorio y Módulos
+## 🎯 Descripción y Objetivos
 
-El proyecto está organizado en 5 hitos técnicos secuenciales:
+Este proyecto documenta la implementación, verificación y auditoría de controles de seguridad fundamentales en un entorno de servidor Linux. El objetivo principal es aplicar el principio de mínimo privilegio y validar técnicamente que cada servicio configurado responda adecuadamente ante intentos de acceso no autorizados.
+
+---
+
+## 📊 Resumen Ejecutivo
+
+* **Hardening SSH:** Autenticación exclusiva por clave asimétrica Ed25519 y desactivación efectiva de contraseñas.
+* **Firewall con UFW:** Política por defecto de denegación (`default deny`) y restricción de acceso SSH únicamente desde la IP de administración.
+* **Servidor Web HTTPS:** Servidor Nginx con TLS 1.2/1.3, redirección 301 obligatoria y cabeceras de seguridad HTTP activas (`always`).
+* **Prevención de Fuerza Bruta:** Fail2ban monitoreando registros de autenticación (`auth.log`) con bloqueo automático de IPs y lista blanca administrativa (`ignoreip`).
+* **Automatización de Respaldos:** Script en Bash ejecutable por `cron` que empaqueta configuraciones críticas y realiza verificaciones de restauración.
+
+---
+
+## 🏗️ Arquitectura del Laboratorio
 
 ```text
-.
-├── README.md                              # Documentación general del portafolio
-├── LICENSE                                # Licencia de código abierto MIT
-├── 01-Hardening-Linux-SSH.md              # Hito 01: Configuración estricta de SSH
-├── 02-Firewall-UFW.md                     # Hito 02: Filtrado granular con UFW
-├── 03-Servicios-Web-HTTPS-Nginx.md        # Hito 03: Despliegue de Nginx y TLS/SSL
-├── 04-Mitigacion-Fuerza-Bruta-Fail2ban.md # Hito 04: H-IPS reactivo con Fail2ban
-├── 05-Automatizacion-Respaldos-Bash-Cron.md # Hito 05: Script de backup y restauración
-├── configs/                               # Archivos de configuración limpios
-├── scripts/                               # Scripts de automatización en Bash
-└── assets/                                # Capturas de pantalla y evidencias
+       ┌─────────────────────────────────────────┐
+       │     Cliente de Administración Windows    │
+       │           IP: 192.168.233.136           │
+       └────────────────────┬────────────────────┘
+                            │
+                            │  SSH (22/tcp) - Restringido por IP
+                            │  HTTP (80/tcp) / HTTPS (443/tcp)
+                            ▼
+       ┌─────────────────────────────────────────┐
+       │          Servidor Ubuntu Target         │
+       │           IP: 192.168.233.140           │
+       ├─────────────────────────────────────────┤
+       │  • OpenSSH (Hardened - Solo Ed25519)    │
+       │  • UFW Firewall (Filtro por IP/Puerto)   │
+       │  • Nginx Web Server (HTTPS & Headers)   │
+       │  • Fail2ban (Análisis de auth.log)      │
+       │  • Backup & Restore Drill (Bash + Cron) │
+       └─────────────────────────────────────────┘
 ```
 
 ---
 
-## 🚀 Resumen Técnico de los Hitos
+## 📚 Hitos del Proyecto
 
-### 🔑 [Hito 01: Hardening Estricto del Servicio SSH](01-Hardening-Linux-SSH.md)
-* **Despliegue de Llaves:** Generación de pares de llaves **Ed25519** y desactivación total de `PasswordAuthentication`.
-* **Mínimo Privilegio:** Restricción de acceso mediante `AllowUsers`, `PermitRootLogin no` y `MaxAuthTries 3`.
-* **Auditoría Runtime:** Verificación efectiva de parámetros mediante `sudo sshd -T` para descartar sobreescrituras en `/etc/ssh/sshd_config.d/`.
+1. **[Hito 01: Hardening de SSH](01-hardening/ssh.md)** — Configuración de claves Ed25519, desactivación de accesos por contraseña y verificación de la configuración efectiva en tiempo de ejecución (`sshd -T`).
+2. **[Hito 02: Firewall y Control de Acceso con UFW](02-network-security/ufw.md)** — Reglas restrictivas por IP de origen, eliminación de redundancias y política global de denegación entrante.
+3. **[Hito 03: Servicios Web Seguros con Nginx y TLS](03-web-security/nginx-tls.md)** — Implementación de certificados TLS, cifrados seguros, redirección HTTP a HTTPS y cabeceras de protección.
+4. **[Hito 04: Prevención de Fuerza Bruta con Fail2ban](04-intrusion-prevention/fail2ban.md)** — Protección contra ataques de diccionario basada en análisis de logs, jaulas personalizadas y exclusión de la IP administrativa.
+5. **[Hito 05: Respaldos Automatizados y Prueba de Restauración](05-backup-recovery/backup-restore.md)** — Script en Bash para empaquetado de datos/configuraciones, programación en `cron` y prueba de extracción de recuperación.
 
-### 🧱 [Hito 02: Configuración del Firewall Perimetral (UFW)](02-Firewall-UFW.md)
-* **Política por Defecto:** Denegación implícita de tráfico entrante (`default deny incoming`).
-* **Reglas Granulares:** Restricción del puerto `22/tcp` exclusivamente a la IP autorizada (`192.168.233.136`).
-* **Servicios Web:** Apertura explícita de puertos `80/tcp` (HTTP) y `443/tcp` (HTTPS).
-
-### 🔒 [Hito 03: Aseguramiento de Servicios Web con Nginx y TLS](03-Servicios-Web-HTTPS-Nginx.md)
-* **Cifrado TLS/SSL:** Generación de certificado OpenSSL con extensión **Subject Alternative Name (SAN)**.
-* **Redirección HTTPS:** Configuración de respuesta HTTP 301 para forzar conexiones cifradas.
-* **Cabeceras HTTP de Seguridad:** Inyección con directiva `always;` de **HSTS**, **CSP** (`default-src 'self'`), `X-Frame-Options DENY` y `X-Content-Type-Options nosniff`.
-
-### 🚨 [Hito 04: Prevención de Intrusiones Basada en Host (Fail2ban)](04-Mitigacion-Fuerza-Bruta-Fail2ban.md)
-* **Protección Reactiva:** Análisis en tiempo real de `/var/log/auth.log` ante fallos de autenticación.
-* **Prevención de Autobaneo:** Configuración de `ignoreip` para evitar el bloqueo del nodo de administración.
-* **Simulación y Unban:** Registro de eventos de bloqueo e inyección dinámica de reglas `REJECT` en UFW.
-
-### 💾 [Hito 05: Automatizacion de Respaldos y Prueba de Restauracion](05-Automatizacion-Respaldos-Bash-Cron.md)
-* **Script Bash:** Compresión en tarball (`.tar.gz`) de sitio web, configs SSH, Nginx, UFW y certificados SSL.
-* **Programación Cron:** Tarea automatizada diaria a las 02:00 AM con rotación a 7 días.
-* **Prueba de Recuperación:** Verificación de integridad mediante simulacro de restauración (*Restore Drill*).
 ---
 
-## 💻 Instalación y Uso
+## 🧪 Pruebas y Evidencias (Testing & Evidence)
 
-Para replicar o revisar este repositorio en tu entorno local:
+| Control Evaluado | Escenario de Prueba | Resultado Esperado | Evidencia Visual |
+| :--- | :--- | :--- | :--- |
+| **SSH Hardening** | Conexión con `PubkeyAuthentication=no` | Rechazo con `Permission denied (publickey)` | `screenshots/ssh-hardening.png` |
+| **UFW Firewall** | Escaneo de puertos y verificación de tabla | Solo puertos 80, 443 (Anywhere) y 22 (Solo 192.168.233.136) abiertos | `screenshots/ufw-status.png` |
+| **Nginx HTTPS** | Inspección de cabeceras HTTP con `curl -I` | Redirección 301 a HTTPS y presencia de cabeceras de seguridad | `screenshots/nginx-headers.png` |
+| **Fail2ban** | Intentos fallidos repetidos en logs | Bloqueo de la IP atacante y registro en `jail.local` | `screenshots/fail2ban-ban.png` |
+| **Respaldos** | Ejecución de script y descompresión en `/tmp` | Generación del `.tar.gz` e integridad de archivos comprobada | `screenshots/backup-restore.png` |
 
-```bash
-# Clonar el repositorio
-git clone https://github.com/seseby/homelab-cybersecurity-portafolio.git
+---
 
-# Acceder al directorio
-cd homelab-cybersecurity-portafolio
+## 📁 Estructura del Repositorio
+
+```text
+homelab-cybersecurity-portafolio/
+│
+├── 01-Hardening-Linux-SSH
+├── 02-Firewall-UFW
+├── 03-Servicios-Web-HTTPS-Nginx
+├── 04-Mitigacion-Fuerza-Bruta-Fail2ban
+├── 05-Automatizacion-Respaldos-Bash-Cron
+│
+├── configs/
+│   ├── jail2ban
+│	│	└── jail.local
+│   ├── nginx
+│	│	└── nginx-homelab
+│   └── ssh
+│		└── sshd_config
+│
+├── scripts/
+│   └── backup-homelab.sh
+│
+├── assets/
+│   
+│
+├── LICENSE
+└── README.md
 ```
 
+> **Nota sobre configuraciones:** Los archivos almacenados en la carpeta `configs/` corresponden a plantillas de ejemplo sanitizadas. Se han retirado o neutralizado claves privadas, contraseñas y valores específicos del entorno.
+
 ---
 
-## 📄 Licencia
+## 🚀 Hoja de Ruta (Roadmap)
 
-Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
+### Fase 1 — Hardening de Infraestructura
+
+- [x] SSH Hardening 
+- [x] UFW Firewall 
+- [x] Nginx + HTTPS -
+- [x]  Fail2ban 
+- [x] Backup & Restore
+
+### Fase 2 — Detección y Monitoreo
+
+- [ ] Wazuh SIEM
+
+### Fase 3 — Simulación de Ataques
+
+- [ ] Nmap 
+- [ ] Hydra 
+- [ ] Traffic analysis
+
+### Fase 4 — Respuesta a Incidentes
+
+- [ ] Incident investigation 
+- [ ] Detection → Analysis → Containment → Recovery
+---
+
+## 🧠 Lo que aprendí (Lessons Learned)
+
+Este proyecto me ha permitido comprender y poner a prueba los siguientes principios clave:
+
+* **La configuración efectiva debe validarse en runtime:** Un archivo de configuración como `sshd_config` no garantiza el comportamiento final si existen archivos secundarios que lo sobrescriben (`sshd_config.d/`). Evaluar con `sshd -T` es indispensable.
+* **Las reglas de firewall deben probarse desde múltiples orígenes:** Verificar un firewall implica comprobar tanto que la IP autorizada puede conectarse como que cualquier otra IP es bloqueada.
+* **Las cabeceras de seguridad requieren la directiva `always`:** En Nginx, si no se especifica `always;` al definir las cabeceras `add_header`, estas no se enviarán en páginas de error (4xx/5xx).
+* **Un respaldo solo es válido si se ha probado su restauración:** La creación de archivos `.tar.gz` es únicamente la mitad del proceso; comprobar la integridad en una extracción de prueba es lo que garantiza la recuperación.
+* **Los controles de seguridad deben ser medibles y reproducibles:** Documentar los comandos de verificación y las salidas reales aporta transparencia y rigor técnico a la administración de sistemas.
+
+---
+
+## 📜 Licencia
+
+Este proyecto está bajo la Licencia **MIT** - consulta el archivo [LICENSE](LICENSE) para más detalles.
